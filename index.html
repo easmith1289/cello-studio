@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cello Studio">
+<meta name="theme-color" content="#1D9E75">
+<title>EAS Cello Studio</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:'Georgia',serif;background:#faf9f7;color:#1a1a18;min-height:100vh}
+:root{
+  --teal:#1D9E75;--teal-light:#E1F5EE;--teal-dark:#085041;
+  --amber:#BA7517;--amber-light:#FAEEDA;
+  --coral:#D85A30;--coral-light:#FAECE7;
+  --purple:#534AB7;--purple-light:#EEEDFE;
+  --surface:#fff;--border:#e5e2db;
+  --text:#1a1a18;--text-muted:#6b6860;--text-hint:#aaa9a3;
+}
+.app{max-width:1100px;margin:0 auto;padding:1.5rem 1.25rem}
+.header{display:flex;align-items:center;justify-content:space-between;padding-bottom:1.25rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem}
+.header-left{display:flex;align-items:center;gap:12px}
+.logo-mark{width:40px;height:40px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0}
+.studio-name{font-size:20px;font-weight:700;letter-spacing:-.3px;line-height:1.1}
+.studio-sub{font-size:12px;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;font-style:italic}
+.nav-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.nav-tab{padding:7px 16px;border-radius:6px;border:1px solid transparent;font-size:13px;cursor:pointer;background:transparent;color:var(--text-muted);transition:all .15s;font-family:inherit}
+.nav-tab:hover{background:#f0ede8;color:var(--text)}
+.nav-tab.active{background:var(--teal);border-color:var(--teal-dark);color:#fff;font-weight:600}
+.view{display:none}.view.active{display:block}
+.btn{padding:7px 15px;border-radius:6px;border:1px solid var(--border);font-size:13px;cursor:pointer;background:var(--surface);color:var(--text);display:inline-flex;align-items:center;gap:6px;transition:all .15s;font-family:inherit}
+.btn:hover{background:#f0ede8}
+.btn-primary{background:var(--teal);color:#fff;border-color:var(--teal-dark)}
+.btn-primary:hover{background:var(--teal-dark)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-danger{background:var(--coral-light);color:var(--coral);border-color:#e9b8a8}
+.btn-warn{background:var(--amber-light);color:var(--amber);border-color:#f0d090}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(20,18,15,.5);z-index:100;align-items:flex-start;justify-content:center;padding-top:3vh;overflow-y:auto}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:12px;border:1px solid var(--border);padding:1.5rem;width:min(520px,94vw);box-shadow:0 8px 32px rgba(0,0,0,.12);margin-bottom:2rem}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center}
+.form-group{margin-bottom:.9rem}
+.form-group label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:3px;font-style:italic;letter-spacing:.3px;text-transform:uppercase}
+.form-group input,.form-group select{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:#faf9f7;color:var(--text);font-family:inherit}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--teal)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.student-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.student-card{border:1px solid var(--border);border-radius:10px;padding:1rem;background:var(--surface);cursor:pointer;transition:all .15s}
+.student-card:hover{border-color:var(--teal);box-shadow:0 2px 8px rgba(29,158,117,.1)}
+.student-card-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.student-name{font-size:14px;font-weight:700}
+.student-meta{font-size:12px;color:var(--text-muted);font-style:italic}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.badge-teal{background:var(--teal-light);color:var(--teal-dark)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-name{text-align:center;font-size:11px;color:var(--text-muted);padding:5px 2px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.cal-day{min-height:78px;padding:5px;border-radius:6px;border:1px solid transparent;background:var(--surface)}
+.cal-day.other-month{background:#f4f2ee}.cal-day.other-month .cal-date{color:var(--text-hint)}
+.cal-day.today{background:var(--teal-light);border-color:#9FE1CB}
+.cal-date{font-size:12px;font-weight:700;margin-bottom:3px;color:var(--text-muted)}
+.cal-day.today .cal-date{color:var(--teal-dark)}
+.cal-lesson{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;line-height:1.4}
+.cal-lesson.attended{background:var(--teal-light);color:var(--teal-dark);border-left:2px solid var(--teal)}
+.cal-lesson.missed-student{background:var(--coral-light);color:var(--coral);border-left:2px solid var(--coral)}
+.cal-lesson.missed-teacher{background:var(--amber-light);color:var(--amber);border-left:2px solid var(--amber)}
+.cal-lesson.scheduled{background:var(--purple-light);color:var(--purple);border-left:2px solid var(--purple)}
+.cal-lesson.rescheduled{background:#f0ede8;color:#5f5e5a;border-left:2px solid #aaa9a3;text-decoration:line-through;opacity:.7}
+.legend{display:flex;gap:14px;margin-bottom:1rem;flex-wrap:wrap}
+.legend-item{font-size:12px;display:flex;align-items:center;gap:5px}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.inv-table{width:100%;border-collapse:collapse;font-size:13px}
+.inv-table th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);font-weight:700;color:var(--text-muted);font-style:italic;font-size:12px}
+.inv-table td{padding:8px 10px;border-bottom:1px solid #f0ede8}
+.inv-table tr:last-child td{border-bottom:none}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+.stat-card{background:#f4f2ee;border-radius:8px;padding:.85rem 1rem}
+.stat-label{font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;font-style:italic}
+.stat-value{font-size:24px;font-weight:700}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;flex-wrap:wrap;gap:8px}
+.section-title{font-size:16px;font-weight:700}
+.empty-state{text-align:center;padding:3.5rem 1rem;color:var(--text-muted)}
+.empty-state .empty-icon{font-size:40px;margin-bottom:.75rem}
+
+/* Schedule ranges in student detail */
+.schedule-range{background:#f4f2ee;border-radius:8px;padding:.75rem 1rem;margin-bottom:.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.schedule-range-info{font-size:13px;line-height:1.6}
+.schedule-range-dates{font-size:11px;color:var(--text-muted);font-style:italic}
+
+/* Invoice styles */
+.inv-preview{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;max-width:640px}
+.inv-header-band{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.75rem;padding-bottom:1.25rem;border-bottom:2px solid var(--teal);gap:1rem}
+.inv-studio-name{font-size:20px;font-weight:700;color:var(--teal-dark)}
+.inv-contact{font-size:12px;color:var(--text-muted);line-height:1.8;margin-top:4px;font-style:italic}
+.inv-number{text-align:right;flex-shrink:0}
+.inv-number p{font-size:11px;color:var(--text-muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.4px;font-style:italic}
+.inv-number strong{font-size:15px;color:var(--text);display:block;margin-bottom:6px}
+.inv-from-to{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.75rem}
+.inv-from-to .label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);font-style:italic;margin-bottom:5px;font-weight:700}
+.inv-from-to p{font-size:13px;line-height:1.7}
+.inv-total-section{border-top:1px solid var(--border);padding-top:.75rem}
+.inv-total-row{display:flex;justify-content:flex-end;padding:8px 10px;font-weight:700;font-size:16px;color:var(--teal-dark)}
+.inv-payment{margin-top:1.25rem;padding:1rem 1.25rem;background:#f4f2ee;border-radius:8px}
+.inv-payment-row{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
+.inv-payment-text{flex:1;min-width:160px}
+.inv-payment-text p{font-size:13px;line-height:1.7;color:var(--text-muted)}
+.inv-payment-text strong{color:var(--text)}
+.inv-payment-qr{flex-shrink:0}
+.inv-payment-qr img{width:90px;height:90px;display:block;border-radius:6px;border:1px solid var(--border)}
+.inv-footer{margin-top:1rem;padding-top:1rem;border-top:1px solid #f0ede8;font-size:12px;color:var(--text-hint);font-style:italic}
+.select-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:1.5rem;flex-wrap:wrap}
+.select-row .form-group{margin:0;min-width:130px}
+
+/* Sync bar */
+.sync-bar{display:flex;align-items:center;gap:10px;padding:.6rem 1rem;border-radius:8px;margin-bottom:1.25rem;font-size:13px;flex-wrap:wrap}
+.sync-bar.signed-out{background:#f4f2ee;border:1px solid var(--border)}
+.sync-bar.syncing{background:var(--teal-light);border:1px solid #9FE1CB}
+.sync-bar.synced{background:var(--teal-light);border:1px solid #9FE1CB}
+.sync-bar.error{background:var(--coral-light);border:1px solid #e9b8a8}
+.sync-bar.offline{background:var(--amber-light);border:1px solid #f0d090}
+.sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sync-dot.green{background:var(--teal)}
+.sync-dot.gray{background:#aaa}
+.sync-dot.red{background:var(--coral)}
+.sync-dot.amber{background:var(--amber)}
+.sync-dot.pulse{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.export-section{background:#f4f2ee;border-radius:10px;padding:.85rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.export-section-label{font-size:12px;color:var(--text-muted);font-style:italic;flex:1;min-width:180px}
+#import-file{display:none}
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#1a1a18;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .25s;font-family:Georgia,serif;white-space:nowrap;pointer-events:none}
+
+/* Print styles for PDF export */
+@media print{
+  @page{margin:1cm;size:A4}
+  .sync-bar,.export-section,.header,.nav-tabs,.select-row,.inv-action-bar,.section-header{display:none!important}
+  .view{display:block!important}
+  #view-students,#view-calendar{display:none!important}
+  #view-invoices{display:block!important}
+  #invoices-container{display:none!important}
+  #invoice-preview{display:block!important}
+  .modal-bg{display:none!important}
+  .inv-preview-actions{display:none!important}
+  body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .inv-preview{border:none;padding:0;max-width:100%}
+  /* Hide browser-injected headers and footers */
+  html{-webkit-print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="sync-bar signed-out" id="sync-bar">
+    <span class="sync-dot gray" id="sync-dot"></span>
+    <span id="sync-msg" style="flex:1">Not connected to Google Drive</span>
+    <button class="btn btn-sm btn-primary" id="signin-btn" onclick="signIn()">&#128274; Sign in with Google</button>
+    <button class="btn btn-sm" id="signout-btn" onclick="signOut()" style="display:none">Sign out</button>
+  </div>
+
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-mark">&#127931;</div>
+      <div>
+        <div class="studio-name">EAS Cello Studio</div>
+        <div class="studio-sub">Emily Austin Smith &mdash; Lesson Manager</div>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showView('students')">&#9836; Students</button>
+      <button class="nav-tab" onclick="showView('calendar')">&#128197; Calendar</button>
+      <button class="nav-tab" onclick="showView('invoices')">&#128196; Invoices</button>
+    </div>
+  </div>
+
+  <div class="export-section">
+    <span class="export-section-label">&#128190; Local backup &mdash; export or import a JSON file</span>
+    <button class="btn btn-sm" onclick="exportData()">&#8659; Export</button>
+    <button class="btn btn-sm" onclick="document.getElementById('import-file').click()">&#8657; Import</button>
+    <input type="file" id="import-file" accept=".json" onchange="importData(event)">
+  </div>
+
+  <!-- STUDENTS -->
+  <div id="view-students" class="view active">
+    <div class="section-header">
+      <div class="section-title">Students</div>
+      <button class="btn btn-primary" onclick="openModal('modal-add-student')">+ Add Student</button>
+    </div>
+    <div id="students-container" class="student-grid"></div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="view-calendar" class="view">
+    <div class="cal-header">
+      <button class="btn btn-sm" onclick="changeMonth(-1)">&#8592; Prev</button>
+      <span style="font-size:16px;font-weight:700" id="cal-month-label"></span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-primary" onclick="openAddOneOff()">+ One-Off Lesson</button>
+        <button class="btn btn-sm" onclick="changeMonth(1)">Next &#8594;</button>
+      </div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:var(--purple)"></span>Scheduled</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span>Attended</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--coral)"></span>Student missed</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>Teacher canceled</span>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div style="margin-top:.75rem;font-size:12px;color:var(--text-hint);text-align:center;font-style:italic">Click any lesson to mark attendance or reschedule</div>
+  </div>
+
+  <!-- INVOICES -->
+  <div id="view-invoices" class="view">
+    <div class="section-header"><div class="section-title">Monthly Invoices</div></div>
+    <div class="select-row">
+      <div class="form-group"><label>Month</label>
+        <select id="inv-month" onchange="renderInvoices()">
+          <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+          <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+          <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+          <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Year</label>
+        <select id="inv-year" onchange="renderInvoices()">
+          <option value="2024">2024</option><option value="2025">2025</option>
+          <option value="2026" selected>2026</option><option value="2027">2027</option>
+        </select>
+      </div>
+    </div>
+    <div id="invoices-container"></div>
+    <div id="invoice-preview" style="display:none;margin-top:1.5rem"></div>
+
+    <!-- Outstanding invoices report -->
+    <div style="margin-top:2rem;border-top:1px solid var(--border);padding-top:1.5rem">
+      <div class="section-title" style="margin-bottom:1rem">&#128270; Outstanding Invoices Report</div>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem">
+        <div class="form-group" style="margin:0;min-width:130px"><label>From Month</label>
+          <select id="rpt-from-month">
+            <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+            <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+            <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+            <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;min-width:90px"><label>Year</label>
+          <select id="rpt-from-year">
+            <option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+          </select>
+        </div>
+        <div style="font-size:13px;color:var(--text-muted);padding-bottom:6px">&rarr; through</div>
+        <div class="form-group" style="margin:0;min-width:130px"><label>To Month</label>
+          <select id="rpt-to-month">
+            <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+            <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+            <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+            <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;min-width:90px"><label>Year</label>
+          <select id="rpt-to-year">
+            <option value="2024">2024</option><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+          </select>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="runOutstandingReport()" style="margin-bottom:1px">Run Report</button>
+      </div>
+      <div id="rpt-output"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Student -->
+<div class="modal-bg" id="modal-add-student">
+  <div class="modal">
+    <div class="modal-title">Add New Student <button class="btn btn-sm" onclick="closeModal('modal-add-student')">&#10005;</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>First Name</label><input id="s-first" placeholder="Jane"></div>
+      <div class="form-group"><label>Last Name</label><input id="s-last" placeholder="Smith"></div>
+    </div>
+    <div class="form-group"><label>Student Email</label><input id="s-email" type="email" placeholder="jane@email.com"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Lesson Day</label>
+        <select id="s-day">
+          <option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option>
+          <option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option><option value="0">Sunday</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Lesson Time</label><input id="s-time" type="time" value="10:00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Lesson Length</label>
+        <select id="s-length"><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>60 min</option><option value="90">90 min</option></select>
+      </div>
+      <div class="form-group"><label>Rate ($ / lesson)</label><input id="s-rate" type="number" value="60" min="0"></div>
+    </div>
+    <div style="background:#f4f2ee;border-radius:8px;padding:.75rem 1rem;margin-bottom:.9rem">
+      <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;font-style:italic;margin-bottom:.5rem">Schedule Active From / To</div>
+      <div class="form-row" style="margin:0;align-items:end">
+        <div class="form-group" style="margin:0">
+          <label>Start Date</label>
+          <input id="s-start" type="date">
+          <div style="font-size:11px;color:transparent;margin-top:3px;user-select:none">&nbsp;</div>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>End Date</label>
+          <input id="s-end" type="date">
+          <div style="font-size:11px;color:var(--text-hint);margin-top:3px;font-style:italic">Leave blank = ongoing</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group"><label>Parent / Guardian Name <span style="font-weight:normal">(optional)</span></label><input id="s-parent" placeholder="John Smith"></div>
+    <div class="form-group"><label>Parent Email <span style="font-weight:normal">(optional)</span></label><input id="s-parent-email" type="email" placeholder="parent@email.com"></div>
+    <div class="form-group"><label>Notes <span style="font-weight:normal">(optional)</span></label><input id="s-notes" placeholder="Beginner, make-up policy, etc."></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:.6rem .75rem;background:#f4f2ee;border-radius:6px;margin-bottom:.9rem">
+      <input type="checkbox" id="s-late-cancel" style="width:16px;height:16px;cursor:pointer">
+      <label for="s-late-cancel" style="font-size:13px;cursor:pointer;color:var(--text)">Charge for late cancellations <span style="font-size:12px;color:var(--text-muted);font-style:italic">(include "student missed" lessons on invoices)</span></label>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:.5rem">
+      <button class="btn" onclick="closeModal('modal-add-student')">Cancel</button>
+      <button class="btn btn-primary" onclick="addStudent()">&#10003; Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Student Detail -->
+<div class="modal-bg" id="modal-student-detail">
+  <div class="modal">
+    <div class="modal-title" id="detail-title">Student <button class="btn btn-sm" onclick="closeModal('modal-student-detail')">&#10005;</button></div>
+    <div id="detail-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Schedule Range -->
+<div class="modal-bg" id="modal-schedule-range">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title" id="range-modal-title">Add Schedule Range <button class="btn btn-sm" onclick="closeModal('modal-schedule-range')">&#10005;</button></div>
+    <div id="range-modal-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: Lesson -->
+<div class="modal-bg" id="modal-lesson">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title" id="lesson-modal-title">Lesson <button class="btn btn-sm" onclick="closeModal('modal-lesson')">&#10005;</button></div>
+    <div id="lesson-modal-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: Reschedule -->
+<div class="modal-bg" id="modal-reschedule">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-title">Reschedule Lesson <button class="btn btn-sm" onclick="closeModal('modal-reschedule')">&#10005;</button></div>
+    <div id="reschedule-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: Add One-Off Lesson -->
+<div class="modal-bg" id="modal-oneoff">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title">Add One-Off Lesson <button class="btn btn-sm" onclick="closeModal('modal-oneoff')">&#10005;</button></div>
+    <div class="form-group"><label>Student</label>
+      <select id="oo-student" onchange="oneOffStudentChanged()"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date</label><input id="oo-date" type="date"></div>
+      <div class="form-group"><label>Time</label><input id="oo-time" type="time" value="10:00"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Duration</label>
+        <select id="oo-length" onchange="oneOffStudentChanged()">
+          <option value="30">30 min</option><option value="45">45 min</option>
+          <option value="60" selected>60 min</option><option value="90">90 min</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Type</label>
+        <select id="oo-type">
+          <option value="scheduled">Regular / Makeup</option>
+          <option value="attended">Already attended</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Amount charged ($)</label>
+        <input id="oo-rate" type="number" min="0" step="0.01" placeholder="e.g. 60">
+      </div>
+      <div style="flex:1;padding-top:1.4rem;font-size:12px;color:var(--text-muted);font-style:italic;align-self:center">
+        Leave blank to use student's default rate
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:.25rem">
+      <button class="btn" onclick="closeModal('modal-oneoff')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmOneOff()">&#10003; Add Lesson</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Import Confirm -->
+<div class="modal-bg" id="modal-import-confirm">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title">&#9888; Confirm Import <button class="btn btn-sm" onclick="closeModal('modal-import-confirm')">&#10005;</button></div>
+    <p style="font-size:14px;margin-bottom:1rem;line-height:1.6">Importing will <strong>replace all current data</strong> with the backup file. This cannot be undone.</p>
+    <p style="font-size:13px;color:var(--text-muted);font-style:italic;margin-bottom:1.25rem" id="import-preview-info"></p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeModal('modal-import-confirm');pendingImport=null">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmImport()">&#10003; Yes, Import</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+
+<script>
+// ── Config ────────────────────────────────────────────────────
+const CLIENT_ID = '685783532194-7b8s4glngosqj0jhcvm6bs9f7o4gir1d.apps.googleusercontent.com';
+const API_KEY   = 'AIzaSyAp89OWNx0MfDqanm9pUl_sSL3U24cUwhk';
+const SCOPES    = 'https://www.googleapis.com/auth/drive.appdata';
+const FILE_NAME = 'eas_cello_data.json';
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const AVATAR_COLORS = ['#1D9E75','#534AB7','#D85A30','#BA7517','#0F6E56','#993556','#185FA5','#3B6D11'];
+const QR_DATAURL = 'data:image/png;base64,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';
+
+// ── State ─────────────────────────────────────────────────────
+// Student shape: { id, firstName, lastName, email, rate, parentName, parentEmail, notes,
+//   scheduleRanges: [{ id, lessonDay, lessonTime, lessonLength, startDate, endDate|null }] }
+// Lesson shape: { id, studentId, time, length, status, rescheduledTo|null, rescheduledFrom|null }
+// status: 'scheduled' | 'attended' | 'missed-student' | 'missed-teacher' | 'rescheduled-away'
+let state = { students:[], lessons:{} };
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let pendingImport = null;
+let driveFileId = null;
+let tokenClient = null;
+let gapiReady = false;
+let gisReady = false;
+let saveTimer = null;
+let isSaving = false;
+let pendingSave = false;
+let editingRangeStudentId = null;
+let editingRangeId = null;
+let reschedulingKey = null;
+let reschedulingLessonId = null;
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg,dur=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._to);t._to=setTimeout(()=>{t.style.opacity='0';},dur);
+}
+
+// ── Local storage ─────────────────────────────────────────────
+function saveLocal(){
+  try{localStorage.setItem('eas_cello',JSON.stringify(state));}catch(e){}
+}
+function loadLocal(){
+  try{const d=localStorage.getItem('eas_cello');if(d){state=JSON.parse(d);return true;}}catch(e){}
+  return false;
+}
+
+// ── Sync UI ───────────────────────────────────────────────────
+function setSyncStatus(type,msg,showSignIn=false,showSignOut=false){
+  const bar=document.getElementById('sync-bar');
+  const dot=document.getElementById('sync-dot');
+  document.getElementById('sync-msg').textContent=msg;
+  bar.className='sync-bar '+type;
+  dot.className='sync-dot '+({syncing:'green pulse',synced:'green',error:'red',offline:'amber','signed-out':'gray'}[type]||'gray');
+  document.getElementById('signin-btn').style.display=showSignIn?'':'none';
+  document.getElementById('signout-btn').style.display=showSignOut?'':'none';
+}
+
+// ── Google API ────────────────────────────────────────────────
+function gapiLoaded(){
+  gapi.load('client',async()=>{
+    await gapi.client.init({apiKey:API_KEY,discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']});
+    gapiReady=true;maybeAutoSignIn();
+  });
+}
+function gisLoaded(){
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:CLIENT_ID,scope:SCOPES,
+    callback:async(resp)=>{
+      if(resp.error){setSyncStatus('error','Google sign-in failed. Working offline.',true);return;}
+      setSyncStatus('syncing','Connecting to Google Drive\u2026',false,true);
+      await loadFromDrive();
+    }
+  });
+  gisReady=true;maybeAutoSignIn();
+}
+function maybeAutoSignIn(){
+  if(!gapiReady||!gisReady)return;
+  const hint=localStorage.getItem('eas_gsi_hint');
+  if(hint){tokenClient.requestAccessToken({prompt:'none',login_hint:hint});}
+  else{setSyncStatus('signed-out','Sign in to auto-save to Google Drive',true,false);}
+}
+function signIn(){
+  if(!gapiReady||!gisReady){showToast('Google API loading, please wait\u2026');setTimeout(signIn,1500);return;}
+  tokenClient.requestAccessToken({prompt:''});
+}
+function signOut(){
+  const token=gapi.client.getToken();
+  if(token)google.accounts.oauth2.revoke(token.access_token,()=>{});
+  gapi.client.setToken(null);
+  localStorage.removeItem('eas_gsi_hint');
+  driveFileId=null;
+  setSyncStatus('signed-out','Signed out. Changes saved locally only.',true,false);
+  showToast('Signed out of Google Drive');
+}
+
+// ── Drive load/save ───────────────────────────────────────────
+async function loadFromDrive(){
+  try{
+    setSyncStatus('syncing','Loading from Google Drive\u2026',false,true);
+    const list=await gapi.client.drive.files.list({
+      spaces:'appDataFolder',fields:'files(id,name,modifiedTime)',q:'name="'+FILE_NAME+'"'
+    });
+    const files=list.result.files;
+    if(files&&files.length>0){
+      driveFileId=files[0].id;
+      const resp=await gapi.client.drive.files.get({fileId:driveFileId,alt:'media'});
+      const driveData=typeof resp.result==='string'?JSON.parse(resp.result):resp.result;
+      const localTs=parseInt(localStorage.getItem('eas_cello_ts')||'0');
+      const driveTs=new Date(files[0].modifiedTime).getTime();
+      if(driveTs>=localTs){
+        state={
+          students:driveData.students||[],
+          lessons:driveData.lessons||{},
+          invoiceStatus:driveData.invoiceStatus||{}
+        };
+        saveLocal();localStorage.setItem('eas_cello_ts',driveTs);
+      }
+      const profile=await getGoogleProfile();
+      if(profile)localStorage.setItem('eas_gsi_hint',profile);
+      setSyncStatus('synced','Synced with Google Drive',false,true);
+    }else{
+      driveFileId=null;await saveToDrive();
+    }
+    renderStudents();
+    if(document.getElementById('view-calendar').classList.contains('active'))renderCalendar();
+    if(document.getElementById('view-invoices').classList.contains('active'))renderInvoices();
+  }catch(err){
+    console.error('Drive load error',err);
+    setSyncStatus('error','Could not reach Google Drive. Working offline.',false,true);
+  }
+}
+async function getGoogleProfile(){
+  try{
+    const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+      {headers:{Authorization:'Bearer '+gapi.client.getToken().access_token}});
+    return (await r.json()).email||null;
+  }catch(e){return null;}
+}
+async function saveToDrive(){
+  if(isSaving){pendingSave=true;return;}
+  const token=gapi.client.getToken();
+  if(!token){saveLocal();return;}
+  isSaving=true;
+  setSyncStatus('syncing','Saving\u2026',false,true);
+  try{
+    const body=JSON.stringify({students:state.students,lessons:state.lessons});
+    if(!driveFileId){
+      const meta=await fetch('https://www.googleapis.com/drive/v3/files',{
+        method:'POST',
+        headers:{Authorization:'Bearer '+token.access_token,'Content-Type':'application/json'},
+        body:JSON.stringify({name:FILE_NAME,parents:['appDataFolder']})
+      });
+      driveFileId=(await meta.json()).id;
+    }
+    await fetch('https://www.googleapis.com/upload/drive/v3/files/'+driveFileId+'?uploadType=media',{
+      method:'PATCH',
+      headers:{Authorization:'Bearer '+token.access_token,'Content-Type':'application/json'},
+      body
+    });
+    saveLocal();localStorage.setItem('eas_cello_ts',Date.now());
+    setSyncStatus('synced','Saved \u2013 '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),false,true);
+  }catch(err){
+    console.error('Drive save error',err);saveLocal();
+    setSyncStatus('offline','Offline \u2013 saved locally, will sync when reconnected',false,true);
+  }
+  isSaving=false;
+  if(pendingSave){pendingSave=false;saveToDrive();}
+}
+function scheduleSave(){saveLocal();clearTimeout(saveTimer);saveTimer=setTimeout(saveToDrive,1200);}
+
+// ── Export / Import ───────────────────────────────────────────
+function exportData(){
+  const obj={version:2,exportedAt:new Date().toISOString(),appName:'EAS Cello Studio',students:state.students,lessons:state.lessons};
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='EAS_Cello_Backup_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('Backup exported!');
+}
+function importData(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.students||!data.lessons){alert('Invalid backup file.');return;}
+      pendingImport=data;
+      const d=data.exportedAt?new Date(data.exportedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'unknown date';
+      document.getElementById('import-preview-info').textContent=
+        'Backup from '+d+' \u2014 '+data.students.length+' student(s), '+Object.values(data.lessons).flat().length+' lesson records.';
+      openModal('modal-import-confirm');
+    }catch(err){alert('Could not read backup file.');}
+  };
+  reader.readAsText(file);event.target.value='';
+}
+function confirmImport(){
+  if(!pendingImport)return;
+  state={students:pendingImport.students||[],lessons:pendingImport.lessons||{}};
+  pendingImport=null;closeModal('modal-import-confirm');scheduleSave();renderStudents();showToast('Backup restored!');
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function showView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach((x,i)=>{x.classList.remove('active');if(i==={students:0,calendar:1,invoices:2}[v])x.classList.add('active');});
+  document.getElementById('view-'+v).classList.add('active');
+  if(v==='calendar')renderCalendar();
+  if(v==='invoices'){document.getElementById('inv-month').value=new Date().getMonth();renderInvoices();}
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ── Helpers ───────────────────────────────────────────────────
+function uid(){return Math.random().toString(36).slice(2,9);}
+function initials(s){return((s.firstName||'')[0]||'').toUpperCase()+((s.lastName||'')[0]||'').toUpperCase();}
+function avatarColor(id){const h=id.split('').reduce((a,c)=>a+c.charCodeAt(0),0);return AVATAR_COLORS[h%AVATAR_COLORS.length];}
+function formatTime(t){
+  if(!t)return'';const[h,m]=t.split(':');const hr=parseInt(h);
+  return(hr>12?hr-12:hr||12)+':'+m+' '+(hr>=12?'PM':'AM');
+}
+function dateKey(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function keyToDate(k){const[y,mo,d]=k.split('-');return new Date(parseInt(y),parseInt(mo)-1,parseInt(d));}
+function todayStr(){const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
+
+// ── Schedule range helpers ────────────────────────────────────
+// Generate lessons for one schedule range, preserving existing attendance
+function generateRangeLessons(student, range){
+  const now = new Date();
+  const yr = now.getFullYear();
+  // Only generate within current year + range bounds
+  const rangeStart = range.startDate ? new Date(range.startDate+'T00:00:00') : new Date(yr,0,1);
+  const rangeEnd   = range.endDate   ? new Date(range.endDate+'T00:00:00')   : new Date(yr,11,31);
+  const genStart   = new Date(Math.max(rangeStart.getTime(), new Date(yr,0,1).getTime()));
+  const genEnd     = new Date(Math.min(rangeEnd.getTime(),   new Date(yr,11,31).getTime()));
+  let d = new Date(genStart);
+  while(d <= genEnd){
+    if(d.getDay() === range.lessonDay){
+      const k = dateKey(d);
+      if(!state.lessons[k]) state.lessons[k]=[];
+      // Only add if no lesson from this student on this day already
+      if(!state.lessons[k].find(l=>l.studentId===student.id)){
+        state.lessons[k].push({
+          id:uid(), studentId:student.id, time:range.lessonTime,
+          length:range.lessonLength, status: d<now ? 'attended' : 'scheduled',
+          rangeId: range.id
+        });
+      }
+    }
+    d.setDate(d.getDate()+1);
+  }
+}
+
+// Rebuild all future lessons for a student from their schedule ranges
+// Preserves past lessons (status != 'scheduled'), only touches future 'scheduled' ones
+function rebuildFutureLessons(student){
+  const now = new Date();
+  // Remove all future 'scheduled' lessons for this student
+  Object.keys(state.lessons).forEach(k=>{
+    const d = keyToDate(k);
+    if(d >= now){
+      state.lessons[k] = state.lessons[k].filter(l=>
+        l.studentId !== student.id || l.status !== 'scheduled'
+      );
+      if(state.lessons[k].length === 0) delete state.lessons[k];
+    }
+  });
+  // Re-generate from all active ranges
+  (student.scheduleRanges||[]).forEach(range=>{
+    generateRangeLessons(student, range);
+  });
+}
+
+// ── Students ──────────────────────────────────────────────────
+function addStudent(){
+  const startVal = document.getElementById('s-start').value;
+  const endVal   = document.getElementById('s-end').value;
+  const rangeId  = uid();
+  const s={
+    id:uid(),
+    firstName:document.getElementById('s-first').value.trim(),
+    lastName:document.getElementById('s-last').value.trim(),
+    email:document.getElementById('s-email').value.trim(),
+    rate:parseFloat(document.getElementById('s-rate').value)||60,
+    parentName:document.getElementById('s-parent').value.trim(),
+    parentEmail:document.getElementById('s-parent-email').value.trim(),
+    notes:document.getElementById('s-notes').value.trim(),
+    chargeLateCancellation:document.getElementById('s-late-cancel').checked,
+    scheduleRanges:[{
+      id:rangeId,
+      lessonDay:parseInt(document.getElementById('s-day').value),
+      lessonTime:document.getElementById('s-time').value,
+      lessonLength:parseInt(document.getElementById('s-length').value),
+      startDate: startVal || new Date().getFullYear()+'-01-01',
+      endDate:   endVal   || null
+    }]
+  };
+  if(!s.firstName||!s.lastName){alert('Please enter the student\'s name.');return;}
+  state.students.push(s);
+  generateRangeLessons(s, s.scheduleRanges[0]);
+  scheduleSave();
+  closeModal('modal-add-student');
+  ['s-first','s-last','s-email','s-parent','s-parent-email','s-notes','s-start','s-end'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('s-late-cancel').checked=false;
+  document.getElementById('s-time').value='10:00';document.getElementById('s-rate').value='60';
+  renderStudents();
+}
+
+function renderStudents(){
+  const c=document.getElementById('students-container');
+  if(!state.students.length){
+    c.innerHTML='<div class="empty-state"><div class="empty-icon">&#127931;</div><p style="font-weight:700;font-size:15px;margin-bottom:6px">No students yet</p><p style="font-size:13px">Add your first student to get started.</p></div>';
+    return;
+  }
+  c.innerHTML=state.students.map(s=>{
+    const col=avatarColor(s.id);
+    const ranges=s.scheduleRanges||[];
+    // Current/most recent active range
+    const activeRange=ranges[ranges.length-1];
+    const scheduleText=activeRange
+      ? DAYS[activeRange.lessonDay]+'s at '+formatTime(activeRange.lessonTime)
+      : 'No schedule';
+    return'<div class="student-card" onclick="showStudentDetail(\''+s.id+'\')">'
+      +'<div class="student-card-header"><div class="avatar" style="background:'+col+'22;color:'+col+'">'+initials(s)+'</div>'
+      +'<div><div class="student-name">'+s.firstName+' '+s.lastName+'</div>'
+      +'<div class="student-meta">'+scheduleText+'</div></div></div>'
+      +'<div style="font-size:12px;color:var(--text-muted);margin-bottom:7px">$'+s.rate+'/lesson'+(activeRange?' &bull; '+activeRange.lessonLength+' min':'')+'</div>'
+      +(s.parentName?'<div style="font-size:12px;color:var(--text-muted);font-style:italic">&#128100; '+s.parentName+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
+function showStudentDetail(id){
+  const s=state.students.find(x=>x.id===id);if(!s)return;
+  const col=avatarColor(s.id);
+  const all=Object.values(state.lessons).flat().filter(l=>l.studentId===id);
+  const att=all.filter(l=>l.status==='attended').length;
+  const ms=all.filter(l=>l.status==='missed-student').length;
+  const mt=all.filter(l=>l.status==='missed-teacher').length;
+  const ranges=s.scheduleRanges||[];
+
+  const rangesHtml=ranges.length===0
+    ? '<p style="font-size:13px;color:var(--text-muted);font-style:italic">No schedule ranges defined.</p>'
+    : ranges.map(r=>{
+        const dayName=DAYS[r.lessonDay];
+        const startFmt=r.startDate?new Date(r.startDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'start of year';
+        const endFmt=r.endDate?new Date(r.endDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'ongoing';
+        return'<div class="schedule-range">'
+          +'<div><div class="schedule-range-info">'+dayName+'s at '+formatTime(r.lessonTime)+' &bull; '+r.lessonLength+' min</div>'
+          +'<div class="schedule-range-dates">'+startFmt+' &rarr; '+endFmt+'</div></div>'
+          +'<div style="display:flex;gap:6px;flex-shrink:0">'
+          +'<button class="btn btn-sm" onclick="openEditRange(\''+id+'\',\''+r.id+'\')">Edit</button>'
+          +'<button class="btn btn-sm btn-danger" onclick="deleteRange(\''+id+'\',\''+r.id+'\')">&#10005;</button>'
+          +'</div></div>';
+      }).join('');
+
+  document.getElementById('detail-title').innerHTML=s.firstName+' '+s.lastName
+    +' <button class="btn btn-sm" onclick="closeModal(\'modal-student-detail\')">&#10005;</button>';
+  document.getElementById('detail-body').innerHTML=
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem">'
+    +'<div class="avatar" style="width:50px;height:50px;font-size:17px;background:'+col+'22;color:'+col+'">'+initials(s)+'</div>'
+    +'<div><div style="font-weight:700;font-size:16px">'+s.firstName+' '+s.lastName+'</div>'
+    +'<div style="font-size:13px;color:var(--text-muted);font-style:italic">'+s.email+'</div></div></div>'
+    +'<table style="width:100%;font-size:13px;border-collapse:collapse;margin-bottom:1.1rem">'
+    +'<tr><td style="padding:5px 0;color:var(--text-muted);font-style:italic;width:130px">Rate</td><td>$'+s.rate+'/lesson</td></tr>'
+    +(s.parentName?'<tr><td style="padding:5px 0;color:var(--text-muted);font-style:italic">Parent</td><td>'+s.parentName+'</td></tr>':'')
+    +(s.parentEmail?'<tr><td style="padding:5px 0;color:var(--text-muted);font-style:italic">Parent email</td><td>'+s.parentEmail+'</td></tr>':'')
+    +(s.notes?'<tr><td style="padding:5px 0;color:var(--text-muted);font-style:italic">Notes</td><td>'+s.notes+'</td></tr>':'')
+    +'</table>'
+    +'<div style="display:flex;align-items:center;gap:10px;padding:.6rem .75rem;background:#f4f2ee;border-radius:6px;margin-bottom:1rem;cursor:pointer" onclick="toggleLateCancellation(\''+id+'\')">'
+    +'<input type="checkbox" '+(s.chargeLateCancellation?'checked':'')+' style="width:15px;height:15px;pointer-events:none">'
+    +'<span style="font-size:13px;color:var(--text)">Charge for late cancellations <span style="font-size:12px;color:var(--text-muted);font-style:italic">(include "student missed" on invoices)</span></span>'
+    +'</div>'
+    +'<div class="stat-grid">'
+    +'<div class="stat-card"><div class="stat-label">Attended</div><div class="stat-value" style="color:var(--teal)">'+att+'</div></div>'
+    +'<div class="stat-card"><div class="stat-label">Student missed</div><div class="stat-value" style="color:var(--coral)">'+ms+'</div></div>'
+    +'<div class="stat-card"><div class="stat-label">Teacher canceled</div><div class="stat-value" style="color:var(--amber)">'+mt+'</div></div></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;margin-top:.25rem">'
+    +'<div style="font-size:13px;font-weight:700">Schedule Ranges</div>'
+    +'<button class="btn btn-sm btn-primary" onclick="openAddRange(\''+id+'\')">+ Add Range</button></div>'
+    +rangesHtml
+    +'<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:1rem">'
+    +'<button class="btn btn-danger btn-sm" onclick="deleteStudent(\''+id+'\')">&#128465; Remove Student</button>'
+    +'<button class="btn btn-sm" onclick="closeModal(\'modal-student-detail\');showView(\'invoices\')">&#128196; Invoice</button>'
+    +'</div>';
+  openModal('modal-student-detail');
+}
+
+function deleteStudent(id){
+  if(!confirm('Remove this student and all their lesson records?'))return;
+  state.students=state.students.filter(s=>s.id!==id);
+  Object.keys(state.lessons).forEach(k=>{
+    state.lessons[k]=state.lessons[k].filter(l=>l.studentId!==id);
+    if(!state.lessons[k].length)delete state.lessons[k];
+  });
+  scheduleSave();closeModal('modal-student-detail');renderStudents();
+}
+
+function toggleLateCancellation(id){
+  const s=state.students.find(x=>x.id===id);if(!s)return;
+  s.chargeLateCancellation=!s.chargeLateCancellation;
+  scheduleSave();
+  showStudentDetail(id); // re-render modal to reflect change
+  showToast(s.chargeLateCancellation?'Late cancellations will be invoiced.':'Late cancellations excluded from invoices.');
+}
+
+// ── Schedule ranges ───────────────────────────────────────────
+function openAddRange(studentId){
+  editingRangeStudentId=studentId;editingRangeId=null;
+  const s=state.students.find(x=>x.id===studentId);
+  document.getElementById('range-modal-title').innerHTML='Add Schedule Range'
+    +' <button class="btn btn-sm" onclick="closeModal(\'modal-schedule-range\')">&#10005;</button>';
+  document.getElementById('range-modal-body').innerHTML=rangeFormHtml(null,s);
+  closeModal('modal-student-detail');
+  openModal('modal-schedule-range');
+}
+function openEditRange(studentId,rangeId){
+  editingRangeStudentId=studentId;editingRangeId=rangeId;
+  const s=state.students.find(x=>x.id===studentId);
+  const r=(s.scheduleRanges||[]).find(x=>x.id===rangeId);
+  document.getElementById('range-modal-title').innerHTML='Edit Schedule Range'
+    +' <button class="btn btn-sm" onclick="closeModal(\'modal-schedule-range\')">&#10005;</button>';
+  document.getElementById('range-modal-body').innerHTML=rangeFormHtml(r,s);
+  closeModal('modal-student-detail');
+  openModal('modal-schedule-range');
+}
+function rangeFormHtml(r,s){
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const lengths=[30,45,60,90];
+  return'<div class="form-row">'
+    +'<div class="form-group"><label>Lesson Day</label><select id="r-day">'
+    +days.map((d,i)=>'<option value="'+i+'"'+(r&&r.lessonDay===i?' selected':(!r&&i===1?' selected':''))+'>'+d+'</option>').join('')
+    +'</select></div>'
+    +'<div class="form-group"><label>Lesson Time</label><input id="r-time" type="time" value="'+(r?r.lessonTime:'10:00')+'"></div></div>'
+    +'<div class="form-row">'
+    +'<div class="form-group"><label>Length</label><select id="r-length">'
+    +lengths.map(l=>'<option value="'+l+'"'+(r&&r.lessonLength===l?' selected':(l===60?' selected':''))+'>'+l+' min</option>').join('')
+    +'</select></div>'
+    +'<div class="form-group"><label>Rate ($/lesson)</label><input id="r-rate" type="number" min="0" value="'+(s?s.rate:60)+'"></div></div>'
+    +'<div class="form-row">'
+    +'<div class="form-group"><label>Start Date</label><input id="r-start" type="date" value="'+(r&&r.startDate?r.startDate:'')+'"></div>'
+    +'<div class="form-group"><label>End Date <span style="font-weight:normal">(blank = ongoing)</span></label><input id="r-end" type="date" value="'+(r&&r.endDate?r.endDate:'')+'"></div></div>'
+    +'<p style="font-size:12px;color:var(--text-muted);font-style:italic;margin-bottom:1rem">Future unconfirmed lessons will be regenerated from these ranges. Past lessons are preserved.</p>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+    +'<button class="btn" onclick="closeModal(\'modal-schedule-range\');showStudentDetail(\''+editingRangeStudentId+'\')">Cancel</button>'
+    +'<button class="btn btn-primary" onclick="saveRange()">&#10003; Save Range</button></div>';
+}
+function saveRange(){
+  const s=state.students.find(x=>x.id===editingRangeStudentId);if(!s)return;
+  const newRate=parseFloat(document.getElementById('r-rate').value);
+  if(!isNaN(newRate))s.rate=newRate;
+  const rangeData={
+    id:editingRangeId||uid(),
+    lessonDay:parseInt(document.getElementById('r-day').value),
+    lessonTime:document.getElementById('r-time').value,
+    lessonLength:parseInt(document.getElementById('r-length').value),
+    startDate:document.getElementById('r-start').value||new Date().getFullYear()+'-01-01',
+    endDate:document.getElementById('r-end').value||null
+  };
+  if(!s.scheduleRanges)s.scheduleRanges=[];
+  if(editingRangeId){
+    const idx=s.scheduleRanges.findIndex(x=>x.id===editingRangeId);
+    if(idx>=0)s.scheduleRanges[idx]=rangeData;
+  }else{
+    s.scheduleRanges.push(rangeData);
+  }
+  rebuildFutureLessons(s);
+  scheduleSave();
+  closeModal('modal-schedule-range');
+  showStudentDetail(editingRangeStudentId);
+  if(document.getElementById('view-calendar').classList.contains('active'))renderCalendar();
+  showToast('Schedule range saved!');
+}
+function deleteRange(studentId,rangeId){
+  if(!confirm('Delete this schedule range? Future lessons from this range will be removed.'))return;
+  const s=state.students.find(x=>x.id===studentId);if(!s)return;
+  s.scheduleRanges=(s.scheduleRanges||[]).filter(r=>r.id!==rangeId);
+  rebuildFutureLessons(s);
+  scheduleSave();
+  showStudentDetail(studentId);
+  if(document.getElementById('view-calendar').classList.contains('active'))renderCalendar();
+  showToast('Range deleted.');
+}
+
+// ── Calendar ──────────────────────────────────────────────────
+function changeMonth(delta){
+  calMonth+=delta;
+  if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+}
+function renderCalendar(){
+  document.getElementById('cal-month-label').textContent=MONTHS[calMonth]+' '+calYear;
+  const grid=document.getElementById('cal-grid');
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const now=new Date();
+  let html=DAYS.map(d=>'<div class="cal-day-name">'+d+'</div>').join('');
+  for(let i=0;i<firstDay;i++){
+    const pd=new Date(calYear,calMonth,0-firstDay+i+1);
+    html+='<div class="cal-day other-month"><div class="cal-date">'+pd.getDate()+'</div></div>';
+  }
+  for(let day=1;day<=daysInMonth;day++){
+    const isToday=now.getFullYear()===calYear&&now.getMonth()===calMonth&&now.getDate()===day;
+    const k=calYear+'-'+(calMonth+1)+'-'+day;
+    const dayLessons=(state.lessons[k]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time));
+    const lHtml=dayLessons.map(l=>{
+      const s=state.students.find(x=>x.id===l.studentId);if(!s)return'';
+      const displayStatus=l.status==='rescheduled-away'?'rescheduled':l.status;
+      return'<div class="cal-lesson '+displayStatus+'" onclick="openLessonModal(\''+k+'\',\''+l.id+'\')" title="'+s.firstName+' '+s.lastName+(l.status==='rescheduled-away'?' (rescheduled)':'')+'">'+formatTime(l.time)+' '+s.firstName+'</div>';
+    }).join('');
+    html+='<div class="cal-day'+(isToday?' today':'')+'" data-key="'+k+'"><div class="cal-date">'+day+'</div>'+lHtml+'</div>';
+  }
+  const rem=(7-(firstDay+daysInMonth)%7)%7;
+  for(let i=1;i<=rem;i++)html+='<div class="cal-day other-month"><div class="cal-date">'+i+'</div></div>';
+  grid.innerHTML=html;
+}
+
+// ── Lesson modal ──────────────────────────────────────────────
+function openLessonModal(key,lessonId){
+  const lessons=state.lessons[key]||[];
+  const lesson=lessons.find(l=>l.id===lessonId);if(!lesson)return;
+  const s=state.students.find(x=>x.id===lesson.studentId);if(!s)return;
+  const[yr,mo,day]=key.split('-');
+  const dateStr=MONTHS[parseInt(mo)-1]+' '+day+', '+yr;
+  const cur=lesson.status;
+  const isRescheduledAway=cur==='rescheduled-away';
+
+  document.getElementById('lesson-modal-title').innerHTML=s.firstName+' '+s.lastName
+    +' <button class="btn btn-sm" onclick="closeModal(\'modal-lesson\')">&#10005;</button>';
+
+  let rescheduledNote='';
+  if(isRescheduledAway&&lesson.rescheduledTo){
+    const[ry,rmo,rd]=lesson.rescheduledTo.split('-');
+    rescheduledNote='<div style="background:var(--amber-light);border-radius:6px;padding:.5rem .75rem;font-size:12px;color:var(--amber);margin-bottom:1rem;font-style:italic">'
+      +'Rescheduled to '+MONTHS[parseInt(rmo)-1]+' '+rd+', '+ry+'</div>';
+  }
+  if(lesson.rescheduledFrom){
+    const[fy,fmo,fd]=lesson.rescheduledFrom.split('-');
+    rescheduledNote='<div style="background:var(--teal-light);border-radius:6px;padding:.5rem .75rem;font-size:12px;color:var(--teal-dark);margin-bottom:1rem;font-style:italic">'
+      +'Rescheduled from '+MONTHS[parseInt(fmo)-1]+' '+fd+', '+fy+'</div>';
+  }
+
+  document.getElementById('lesson-modal-body').innerHTML=
+    '<p style="font-size:13px;color:var(--text-muted);margin-bottom:.75rem;font-style:italic">'+dateStr+' &bull; '+formatTime(lesson.time)+' &bull; '+lesson.length+' min</p>'
+    +rescheduledNote
+    +(isRescheduledAway
+      ?'<div style="display:flex;gap:8px;margin-bottom:.5rem">'
+        +'<button class="btn btn-sm btn-danger" onclick="removeLesson(\''+key+'\',\''+lessonId+'\')" style="flex:1;justify-content:center">&#128465; Remove this record</button>'
+        +'</div>'
+      :'<p style="font-size:13px;font-weight:700;margin-bottom:.5rem">Mark Attendance</p>'
+      +'<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:1rem">'
+      +'<button class="btn'+(cur==='attended'?' btn-primary':'')+'" onclick="setAttendance(\''+key+'\',\''+lessonId+'\',\'attended\')" style="justify-content:flex-start">&#10003; Attended</button>'
+      +'<button class="btn" style="'+(cur==='missed-student'?'border-color:var(--coral);background:var(--coral-light);color:var(--coral);':'')+' justify-content:flex-start" onclick="setAttendance(\''+key+'\',\''+lessonId+'\',\'missed-student\')">&#10005; Student missed</button>'
+      +'<button class="btn" style="'+(cur==='missed-teacher'?'border-color:var(--amber);background:var(--amber-light);color:var(--amber);':'')+' justify-content:flex-start" onclick="setAttendance(\''+key+'\',\''+lessonId+'\',\'missed-teacher\')">&#8635; Teacher canceled</button>'
+      +'<button class="btn" style="'+(cur==='scheduled'?'border-color:var(--purple);background:var(--purple-light);color:var(--purple);':'')+' justify-content:flex-start" onclick="setAttendance(\''+key+'\',\''+lessonId+'\',\'scheduled\')">&#128337; Scheduled (reset)</button>'
+      +'</div>'
+      +'<hr style="border:none;border-top:1px solid var(--border);margin-bottom:1rem">'
+      +'<div style="display:flex;gap:8px">'
+      +'<button class="btn btn-sm btn-warn" onclick="openReschedule(\''+key+'\',\''+lessonId+'\')" style="flex:1;justify-content:center">&#128197; Reschedule</button>'
+      +'<button class="btn btn-sm btn-danger" onclick="removeLesson(\''+key+'\',\''+lessonId+'\')" style="justify-content:center">&#128465; Remove</button>'
+      +'</div>'
+    )
+    +'<div style="margin-top:.75rem;font-size:12px;color:var(--text-hint);font-style:italic">Rate: $'+s.rate+'/lesson</div>';
+  openModal('modal-lesson');
+}
+
+function setAttendance(key,lessonId,status){
+  if(state.lessons[key]){
+    const l=state.lessons[key].find(x=>x.id===lessonId);
+    if(l){l.status=status;scheduleSave();renderCalendar();}
+  }
+  closeModal('modal-lesson');
+}
+
+function removeLesson(key,lessonId){
+  if(!confirm('Remove this lesson permanently? This cannot be undone.'))return;
+  if(state.lessons[key]){
+    state.lessons[key]=state.lessons[key].filter(l=>l.id!==lessonId);
+    if(!state.lessons[key].length)delete state.lessons[key];
+  }
+  scheduleSave();renderCalendar();closeModal('modal-lesson');showToast('Lesson removed.');
+}
+
+// ── Reschedule ────────────────────────────────────────────────
+function openReschedule(key,lessonId){
+  reschedulingKey=key;reschedulingLessonId=lessonId;
+  const lesson=(state.lessons[key]||[]).find(l=>l.id===lessonId);
+  const s=lesson?state.students.find(x=>x.id===lesson.studentId):null;
+  if(!lesson||!s)return;
+  const[yr,mo,day]=key.split('-');
+  const dateStr=MONTHS[parseInt(mo)-1]+' '+day+', '+yr;
+  document.getElementById('reschedule-body').innerHTML=
+    '<p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem;font-style:italic">Original: '+dateStr+' at '+formatTime(lesson.time)+' ('+s.firstName+' '+s.lastName+')</p>'
+    +'<div class="form-row">'
+    +'<div class="form-group"><label>New Date</label><input id="rs-date" type="date" value="'+todayStr()+'"></div>'
+    +'<div class="form-group"><label>New Time</label><input id="rs-time" type="time" value="'+lesson.time+'"></div></div>'
+    +'<div class="form-group"><label>Duration (min)</label>'
+    +'<select id="rs-length"><option value="30">30 min</option><option value="45">45 min</option>'
+    +'<option value="60"'+(lesson.length===60?' selected':'')+'>60 min</option>'
+    +'<option value="90"'+(lesson.length===90?' selected':'')+'>90 min</option></select></div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+    +'<button class="btn" onclick="closeModal(\'modal-reschedule\')">Cancel</button>'
+    +'<button class="btn btn-primary" onclick="confirmReschedule()">&#10003; Reschedule</button></div>';
+  closeModal('modal-lesson');
+  openModal('modal-reschedule');
+}
+
+function confirmReschedule(){
+  const newDate=document.getElementById('rs-date').value;
+  const newTime=document.getElementById('rs-time').value;
+  const newLength=parseInt(document.getElementById('rs-length').value);
+  if(!newDate||!newTime){alert('Please select a date and time.');return;}
+  const oldLessons=state.lessons[reschedulingKey]||[];
+  const oldLesson=oldLessons.find(l=>l.id===reschedulingLessonId);
+  if(!oldLesson){closeModal('modal-reschedule');return;}
+  // Mark original as rescheduled-away
+  oldLesson.status='rescheduled-away';
+  oldLesson.rescheduledTo=newDate;
+  // Create new lesson on new date
+  const[ny,nmo,nd]=newDate.split('-');
+  const newKey=parseInt(ny)+'-'+parseInt(nmo)+'-'+parseInt(nd);
+  if(!state.lessons[newKey])state.lessons[newKey]=[];
+  // Check if student already has lesson that day
+  const existing=state.lessons[newKey].find(l=>l.studentId===oldLesson.studentId);
+  if(existing){
+    if(!confirm('This student already has a lesson on '+MONTHS[parseInt(nmo)-1]+' '+parseInt(nd)+'. Add another anyway?')){
+      closeModal('modal-reschedule');return;
+    }
+  }
+  state.lessons[newKey].push({
+    id:uid(), studentId:oldLesson.studentId, time:newTime,
+    length:newLength, status:'scheduled',
+    rescheduledFrom:reschedulingKey, rangeId:oldLesson.rangeId||null
+  });
+  scheduleSave();renderCalendar();closeModal('modal-reschedule');
+  showToast('Lesson rescheduled!');
+}
+
+// ── Invoices ──────────────────────────────────────────────────
+// state.invoiceStatus[key] = { sent: bool, paid: bool }
+// key = studentId + '-' + year + '-' + month  (or 'COMBINED-' + year + '-' + month for combined)
+function invStatusKey(studentId, month, year){ return studentId+'-'+year+'-'+month; }
+
+function getInvStatus(studentId, month, year){
+  const k = invStatusKey(studentId, month, year);
+  return (state.invoiceStatus && state.invoiceStatus[k]) || {sent:false, paid:false, sentDate:null, paidDate:null};
+}
+
+function setInvStatus(studentId, month, year, field, value){
+  if(!state.invoiceStatus) state.invoiceStatus = {};
+  const k = invStatusKey(studentId, month, year);
+  if(!state.invoiceStatus[k]) state.invoiceStatus[k] = {sent:false, paid:false, sentDate:null, paidDate:null};
+  state.invoiceStatus[k][field] = value;
+  // Record or clear the date
+  const dateField = field+'Date';
+  state.invoiceStatus[k][dateField] = value ? new Date().toISOString().slice(0,10) : null;
+  scheduleSave();
+  renderInvoices();
+}
+
+function renderInvoices(){
+  const month=parseInt(document.getElementById('inv-month').value);
+  const year=parseInt(document.getElementById('inv-year').value);
+  const c=document.getElementById('invoices-container');
+  document.getElementById('invoice-preview').style.display='none';
+  if(!state.students.length){
+    c.innerHTML='<div class="empty-state"><div class="empty-icon">&#128196;</div><p>No students &mdash; add students first.</p></div>';return;
+  }
+  const rows=state.students.map(s=>{
+    const att=getAttendedLessons(s.id,month,year);
+    const total=att.reduce((sum,l)=>sum+(l.customRate!=null?l.customRate:s.rate),0).toFixed(2);
+    const recipient=s.parentName||s.firstName+' '+s.lastName;
+    const status=getInvStatus(s.id,month,year);
+    return{student:s,attended:att.length,total,recipient,email:s.parentEmail||s.email,status};
+  });
+
+  c.innerHTML='<div style="background:#f4f2ee;border-radius:10px;padding:.85rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+    +'<span style="font-size:13px;color:var(--text-muted);font-style:italic;flex:1">Select students for a combined invoice, or view individual invoices below.</span>'
+    +'<button class="btn btn-sm" onclick="selectAllInvoices(true)">Select all</button>'
+    +'<button class="btn btn-sm" onclick="selectAllInvoices(false)">Clear</button>'
+    +'<button class="btn btn-sm btn-primary" onclick="showCombinedInvoice('+month+','+year+')">&#128196; Combined Invoice</button>'
+    +'</div>'
+    +'<table class="inv-table" style="margin-bottom:1.5rem">'
+    +'<thead><tr>'
+    +'<th style="width:32px"></th>'
+    +'<th>Student</th>'
+    +'<th>Attended</th>'
+    +'<th>Amount</th>'
+    +'<th>Sent</th>'
+    +'<th>Paid</th>'
+    +'<th></th>'
+    +'</tr></thead>'
+    +'<tbody>'+rows.map(r=>{
+      const sid=r.student.id;
+      const fmtDate=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+      const sentBtn=r.status.sent
+        ? '<button class="btn btn-sm" style="background:var(--teal-light);color:var(--teal-dark);border-color:#9FE1CB;min-width:72px" onclick="setInvStatus(\''+sid+'\','+month+','+year+',\'sent\',false)">&#10003; Sent</button>'
+          +(r.status.sentDate?'<div style="font-size:10px;color:var(--text-muted);margin-top:2px;font-style:italic">'+fmtDate(r.status.sentDate)+'</div>':'')
+        : '<button class="btn btn-sm" style="min-width:72px;color:var(--text-muted)" onclick="setInvStatus(\''+sid+'\','+month+','+year+',\'sent\',true)">Mark sent</button>';
+      const paidBtn=r.status.paid
+        ? '<button class="btn btn-sm" style="background:var(--teal-light);color:var(--teal-dark);border-color:#9FE1CB;min-width:72px" onclick="setInvStatus(\''+sid+'\','+month+','+year+',\'paid\',false)">&#10003; Paid</button>'
+          +(r.status.paidDate?'<div style="font-size:10px;color:var(--text-muted);margin-top:2px;font-style:italic">'+fmtDate(r.status.paidDate)+'</div>':'')
+        : '<button class="btn btn-sm" style="min-width:72px;color:var(--text-muted)" onclick="setInvStatus(\''+sid+'\','+month+','+year+',\'paid\',true)">Mark paid</button>';
+      const rowStyle=r.status.paid?'background:#f4fdf9':'';
+      return'<tr style="'+rowStyle+'">'
+        +'<td><input type="checkbox" class="inv-check" value="'+sid+'" style="width:16px;height:16px;cursor:pointer"></td>'
+        +'<td><strong>'+r.student.firstName+' '+r.student.lastName+'</strong>'
+        +'<div style="font-size:11px;color:var(--text-muted)">'+r.recipient+'</div></td>'
+        +'<td>'+r.attended+'</td>'
+        +'<td style="font-weight:700">$'+r.total+'</td>'
+        +'<td style="vertical-align:top">'+sentBtn+'</td>'
+        +'<td style="vertical-align:top">'+paidBtn+'</td>'
+        +'<td><button class="btn btn-sm" onclick="showInvoice(\''+sid+'\','+month+','+year+')">View</button></td>'
+        +'</tr>';
+    }).join('')+'</tbody></table>';
+}
+
+function selectAllInvoices(val){
+  document.querySelectorAll('.inv-check').forEach(cb=>cb.checked=val);
+}
+
+function getAttendedLessons(studentId,month,year){
+  const s=state.students.find(x=>x.id===studentId);
+  const includeStatuses=['attended'];
+  if(s&&s.chargeLateCancellation) includeStatuses.push('missed-student');
+  const entries=[];
+  Object.entries(state.lessons).forEach(([k,ls])=>{
+    const[y,mo]=k.split('-');
+    if(parseInt(y)===year&&parseInt(mo)-1===month){
+      ls.filter(l=>l.studentId===studentId&&includeStatuses.includes(l.status))
+        .forEach(l=>entries.push({...l,dateKey:k}));
+    }
+  });
+  // Sort by actual date value (keys are not zero-padded so string sort is unreliable)
+  return entries.sort((a,b)=>{
+    const[ay,am,ad]=a.dateKey.split('-').map(Number);
+    const[by,bm,bd]=b.dateKey.split('-').map(Number);
+    return new Date(ay,am-1,ad)-new Date(by,bm-1,bd);
+  });
+}
+
+function buildInvoiceHTML(students, month, year, combined){
+  // students: array of student objects
+  // For combined: one invoice with all students listed as line groups
+  // For single: one student
+  const period=MONTHS[month]+' '+year;
+  const invNum=combined
+    ? 'INV-'+year+String(month+1).padStart(2,'0')+'-COMBINED'
+    : 'INV-'+year+String(month+1).padStart(2,'0')+'-'+students[0].id.slice(0,5).toUpperCase();
+
+  let tableRows='';
+  let grandTotal=0;
+
+  students.forEach((s,si)=>{
+    const entries=getAttendedLessons(s.id,month,year);
+    const subtotal=entries.reduce((sum,l)=>sum+(l.customRate!=null?l.customRate:s.rate),0);
+    grandTotal+=subtotal;
+    if(combined && students.length>1){
+      tableRows+='<tr><td colspan="3" style="padding:10px 10px 4px;font-weight:700;font-size:13px;border-bottom:none;color:var(--text-muted);font-style:italic">'
+        +s.firstName+' '+s.lastName+(s.parentName?' ('+s.parentName+')':'')+'</td>'
+        +'<td style="text-align:right;padding:10px 10px 4px;border-bottom:none"></td></tr>';
+    }
+    if(entries.length===0){
+      tableRows+='<tr><td colspan="3" style="color:var(--text-muted);font-style:italic;padding:5px 10px 8px">No attended lessons this month</td><td style="text-align:right;padding:5px 10px 8px">$0.00</td></tr>';
+    } else {
+      entries.forEach(l=>{
+        const[ly,lmo,ld]=l.dateKey.split('-');
+        const isLateCxl=l.status==='missed-student';
+        const rowRate=l.customRate!=null?l.customRate:s.rate;
+        tableRows+='<tr>'
+          +'<td>'+MONTHS[parseInt(lmo)-1]+' '+ld+', '+ly+(isLateCxl?' <span style="font-size:10px;color:var(--amber);font-style:italic">(late cancel)</span>':'')+'</td>'
+          +'<td>'+formatTime(l.time)+'</td>'
+          +'<td>'+l.length+' min</td>'
+          +'<td style="text-align:right">$'+rowRate.toFixed(2)+'</td></tr>';
+      });
+    }
+    if(combined && students.length>1){
+      tableRows+='<tr style="background:#f9f8f6"><td colspan="3" style="text-align:right;padding:5px 10px;font-style:italic;font-size:12px;color:var(--text-muted);border-bottom:1px solid var(--border)">Subtotal '+s.firstName+'</td>'
+        +'<td style="text-align:right;padding:5px 10px;font-weight:600;border-bottom:1px solid var(--border)">$'+subtotal.toFixed(2)+'</td></tr>';
+    }
+  });
+
+  // Bill-to block
+  let billTo='';
+  if(combined && students.length>1){
+    billTo='<div><div class="label">Bill To</div><p>'
+      +students.map(s=>{
+        const r=s.parentName||s.firstName+' '+s.lastName;
+        const e=s.parentEmail||s.email;
+        return r+'<br><span style="font-size:12px;color:var(--text-muted)">'+e+'</span>';
+      }).join('<br>')+'</p></div>';
+  } else {
+    const s=students[0];
+    const recipient=s.parentName||s.firstName+' '+s.lastName;
+    const email=s.parentEmail||s.email;
+    billTo='<div><div class="label">Bill To</div><p>'+recipient+'<br>'+email
+      +(s.parentName?'<br><span style="font-size:12px;color:var(--text-muted)">Student: '+s.firstName+' '+s.lastName+'</span>':'')+'</p></div>';
+  }
+
+  return '<div class="inv-preview" id="inv-print-area">'
+    +'<div class="inv-header-band">'
+    +'<div><div class="inv-studio-name">EAS Cello Studio</div>'
+    +'<div class="inv-contact">Emily Austin Smith, Cello Instructor<br>eascellostudio@gmail.com &bull; 816-591-0555</div></div>'
+    +'<div class="inv-number"><p>Invoice</p><strong>'+invNum+'</strong><p>Period</p><strong>'+period+'</strong></div>'
+    +'</div>'
+    +'<div class="inv-from-to">'+billTo+'</div>'
+    +'<table class="inv-table"><thead><tr><th>Date</th><th>Time</th><th>Duration</th><th style="text-align:right">Amount</th></tr></thead>'
+    +'<tbody>'+tableRows+'</tbody></table>'
+    +'<div class="inv-total-section"><div class="inv-total-row">Total Due: $'+grandTotal.toFixed(2)+'</div></div>'
+    +'<div class="inv-payment" style="margin-top:1.25rem;padding:1rem 1.25rem;background:#f4f2ee;border-radius:8px">'
+    +'<div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">'
+    +'<div style="flex:1;min-width:160px">'
+    +'<p style="font-size:13px;line-height:1.8;color:var(--text-muted)"><strong style="color:var(--text)">Payment via Zelle</strong><br>'
+    +'Send to: <strong style="color:var(--text)">easmith1289@gmail.com</strong><br>'
+    +'<span style="font-size:12px">Payment due within 14 days of receipt.</span></p>'
+    +'</div>'
+    +'<div style="flex-shrink:0"><img src="'+QR_DATAURL+'" alt="Zelle QR code" style="width:90px;height:90px;display:block;border-radius:6px;border:1px solid var(--border)"></div>'
+    +'</div></div>'
+    +'</div>';
+}
+
+function showInvoice(studentId,month,year){
+  const s=state.students.find(x=>x.id===studentId);if(!s)return;
+  const safeLast=s.lastName.replace(/[^a-zA-Z0-9]/g,'');
+  const pdfFilename='Invoice_'+safeLast+'_'+MONTHS[month]+'_'+year+'.pdf';
+  const invNum='INV-'+year+String(month+1).padStart(2,'0')+'-'+s.id.slice(0,5).toUpperCase();
+  const total=(getAttendedLessons(s.id,month,year).length*s.rate).toFixed(2);
+  const email=s.parentEmail||s.email;
+  const status=getInvStatus(s.id,month,year);
+  const prev=document.getElementById('invoice-preview');
+  prev.style.display='block';
+  const fmtD=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+  prev.innerHTML=buildInvoiceHTML([s],month,year,false)
+    +'<div class="inv-preview-actions" style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+    +'<button class="btn btn-sm" onclick="printInvoicePDF(\''+pdfFilename+'\')">&#128424; Save as PDF</button>'
+    +'<button class="btn btn-sm btn-primary" onclick="copyEmail(\''+s.firstName+'\',\''+s.lastName+'\',\''+email+'\',\''+invNum+'\',\''+MONTHS[month]+' '+year+'\',\''+total+'\',\''+s.id+'\','+month+','+year+')">&#9993; Copy Email</button>'
+    +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
+    +'<button class="btn btn-sm" style="'+(status.sent?'background:var(--teal-light);color:var(--teal-dark);border-color:#9FE1CB':'')+'" onclick="setInvStatus(\''+s.id+'\','+month+','+year+',\'sent\','+(!status.sent)+');showInvoice(\''+s.id+'\','+month+','+year+')">'+(status.sent?'&#10003; Sent':'Mark sent')+'</button>'
+    +(status.sentDate?'<span style="font-size:10px;color:var(--text-muted);font-style:italic">'+fmtD(status.sentDate)+'</span>':'')
+    +'</div>'
+    +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
+    +'<button class="btn btn-sm" style="'+(status.paid?'background:var(--teal-light);color:var(--teal-dark);border-color:#9FE1CB':'')+'" onclick="setInvStatus(\''+s.id+'\','+month+','+year+',\'paid\','+(!status.paid)+');showInvoice(\''+s.id+'\','+month+','+year+')">'+(status.paid?'&#10003; Paid':'Mark paid')+'</button>'
+    +(status.paidDate?'<span style="font-size:10px;color:var(--text-muted);font-style:italic">'+fmtD(status.paidDate)+'</span>':'')
+    +'</div>'
+    +'</div>';
+  prev.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function showCombinedInvoice(month,year){
+  const checked=Array.from(document.querySelectorAll('.inv-check:checked')).map(cb=>cb.value);
+  if(!checked.length){showToast('Select at least one student.');return;}
+  const students=checked.map(id=>state.students.find(s=>s.id===id)).filter(Boolean);
+  const pdfFilename='Invoice_Combined_'+MONTHS[month]+'_'+year+'.pdf';
+  const prev=document.getElementById('invoice-preview');
+  prev.style.display='block';
+  const combined=students.length>1;
+  prev.innerHTML=buildInvoiceHTML(students,month,year,combined)
+    +'<div class="inv-preview-actions" style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap">'
+    +'<button class="btn btn-sm" onclick="printInvoicePDF(\''+pdfFilename+'\')">&#128424; Save as PDF</button>'
+    +'</div>';
+  prev.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function printInvoicePDF(filename){
+  const origTitle=document.title;
+  document.title=filename;
+  window.print();
+  setTimeout(()=>{document.title=origTitle;},1000);
+}
+
+function copyEmail(first,last,email,invNum,period,total,studentId,month,year){
+  const text='To: '+email+'\nSubject: Invoice '+invNum+' \u2014 '+period+'\n\nDear '+first+',\n\n'
+    +'Please find your invoice for cello lessons for '+period+'.\n\n'
+    +'  Invoice #: '+invNum+'\n  Amount due: $'+total+'\n\n'
+    +'Payment via Zelle to: easmith1289@gmail.com\n'
+    +'Payment due within 14 days of receipt.\n\n'
+    +'Thank you! Please reach out with any questions.\n\n'
+    +'Best,\nEmily Austin Smith, Cello Instructor\nEAS Cello Studio\neascellostudio@gmail.com | 816-591-0555';
+  const doCopy=()=>{
+    // Auto-mark as sent
+    if(studentId!==undefined){
+      setInvStatus(studentId,month,year,'sent',true);
+      showInvoice(studentId,month,year);
+    }
+    showToast('Email text copied!');
+  };
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(doCopy).catch(()=>{prompt('Copy this:',text);doCopy();});
+  }else{prompt('Copy this:',text);doCopy();}
+}
+
+// ── One-off lessons ───────────────────────────────────────────
+function openAddOneOff(){
+  if(!state.students.length){ showToast('Add a student first.'); return; }
+  const sel = document.getElementById('oo-student');
+  sel.innerHTML = state.students.map(s=>
+    '<option value="'+s.id+'">'+s.firstName+' '+s.lastName+'</option>'
+  ).join('');
+  document.getElementById('oo-date').value = todayStr();
+  document.getElementById('oo-type').value = 'scheduled';
+  document.getElementById('oo-rate').value = '';
+  // Pre-fill time/length/rate from first student's most recent schedule range
+  oneOffStudentChanged();
+  openModal('modal-oneoff');
+}
+
+function oneOffStudentChanged(){
+  const studentId = document.getElementById('oo-student').value;
+  const s = state.students.find(x=>x.id===studentId);
+  if(!s) return;
+  const range = s.scheduleRanges && s.scheduleRanges.length
+    ? s.scheduleRanges[s.scheduleRanges.length-1] : null;
+  if(range){
+    document.getElementById('oo-time').value = range.lessonTime;
+    // Set length dropdown to match student's default
+    const lenSel = document.getElementById('oo-length');
+    const opt = Array.from(lenSel.options).find(o=>parseInt(o.value)===range.lessonLength);
+    if(opt) lenSel.value = range.lessonLength;
+  }
+  // Always show the student's default rate as placeholder
+  document.getElementById('oo-rate').placeholder = 'Default: $'+s.rate;
+}
+
+function confirmOneOff(){
+  const studentId = document.getElementById('oo-student').value;
+  const dateVal   = document.getElementById('oo-date').value;
+  const timeVal   = document.getElementById('oo-time').value;
+  const length    = parseInt(document.getElementById('oo-length').value);
+  const status    = document.getElementById('oo-type').value;
+  const rateInput = document.getElementById('oo-rate').value;
+  const customRate = rateInput !== '' ? parseFloat(rateInput) : null;
+  if(!studentId||!dateVal||!timeVal){ alert('Please fill in all fields.'); return; }
+  const [y,mo,d] = dateVal.split('-');
+  const key = parseInt(y)+'-'+parseInt(mo)+'-'+parseInt(d);
+  if(!state.lessons[key]) state.lessons[key]=[];
+  const lesson = { id:uid(), studentId, time:timeVal, length, status, oneOff:true };
+  if(customRate !== null) lesson.customRate = customRate;
+  state.lessons[key].push(lesson);
+  scheduleSave();
+  closeModal('modal-oneoff');
+  // Jump calendar to that month so it's visible
+  calYear=parseInt(y); calMonth=parseInt(mo)-1;
+  renderCalendar();
+  showToast('One-off lesson added!');
+}
+
+// ── Outstanding invoices report ───────────────────────────────
+function runOutstandingReport(){
+  const fromMonth=parseInt(document.getElementById('rpt-from-month').value);
+  const fromYear=parseInt(document.getElementById('rpt-from-year').value);
+  const toMonth=parseInt(document.getElementById('rpt-to-month').value);
+  const toYear=parseInt(document.getElementById('rpt-to-year').value);
+  const out=document.getElementById('rpt-output');
+
+  // Build list of all month/year combos in range
+  const periods=[];
+  let y=fromYear, m=fromMonth;
+  while(y<toYear||(y===toYear&&m<=toMonth)){
+    periods.push({month:m,year:y});
+    m++;if(m>11){m=0;y++;}
+    if(periods.length>60)break; // safety cap
+  }
+
+  const needsSending=[];  // has attended lessons, not yet sent
+  const needsPayment=[];  // sent but not paid
+
+  periods.forEach(({month,year})=>{
+    state.students.forEach(s=>{
+      const att=getAttendedLessons(s.id,month,year);
+      if(!att.length)return; // no lessons, skip
+      const status=getInvStatus(s.id,month,year);
+      const total=att.reduce((sum,l)=>sum+(l.customRate!=null?l.customRate:s.rate),0).toFixed(2);
+      const recipient=s.parentName||s.firstName+' '+s.lastName;
+      const fmtDate=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+      const entry={
+        name:s.firstName+' '+s.lastName, recipient, period:MONTHS[month]+' '+year,
+        lessons:att.length, total, status,
+        sentDate:fmtDate(status.sentDate), paidDate:fmtDate(status.paidDate),
+        studentId:s.id, month, year
+      };
+      if(!status.sent) needsSending.push(entry);
+      else if(!status.paid) needsPayment.push(entry);
+    });
+  });
+
+  if(!needsSending.length&&!needsPayment.length){
+    out.innerHTML='<div style="background:var(--teal-light);border:1px solid #9FE1CB;border-radius:8px;padding:1rem 1.25rem;font-size:13px;color:var(--teal-dark)">'
+      +'&#10003; All clear! No outstanding invoices in this date range.</div>';
+    return;
+  }
+
+  const tableStyle='width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1.5rem';
+  const thStyle='text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);font-weight:700;color:var(--text-muted);font-style:italic;font-size:12px';
+  const tdStyle='padding:7px 10px;border-bottom:1px solid #f0ede8;vertical-align:middle';
+
+  let html='';
+
+  if(needsSending.length){
+    html+='<div style="font-size:14px;font-weight:700;color:var(--amber);margin-bottom:.6rem">&#9888; Not yet sent ('+needsSending.length+')</div>'
+      +'<table style="'+tableStyle+'">'
+      +'<thead><tr>'
+      +'<th style="'+thStyle+'">Student</th>'
+      +'<th style="'+thStyle+'">Period</th>'
+      +'<th style="'+thStyle+'">Lessons</th>'
+      +'<th style="'+thStyle+'">Amount</th>'
+      +'<th style="'+thStyle+'"></th>'
+      +'</tr></thead><tbody>'
+      +needsSending.map(e=>
+        '<tr style="background:var(--amber-light)">'
+        +'<td style="'+tdStyle+'"><strong>'+e.name+'</strong><div style="font-size:11px;color:var(--text-muted)">'+e.recipient+'</div></td>'
+        +'<td style="'+tdStyle+'">'+e.period+'</td>'
+        +'<td style="'+tdStyle+'">'+e.lessons+'</td>'
+        +'<td style="'+tdStyle+';font-weight:700">$'+e.total+'</td>'
+        +'<td style="'+tdStyle+'"><button class="btn btn-sm" onclick="showView(\'invoices\');setTimeout(()=>{document.getElementById(\'inv-month\').value='+e.month+';document.getElementById(\'inv-year\').value='+e.year+';renderInvoices();showInvoice(\''+e.studentId+'\','+e.month+','+e.year+')},50)">View</button></td>'
+        +'</tr>'
+      ).join('')
+      +'</tbody></table>';
+  }
+
+  if(needsPayment.length){
+    html+='<div style="font-size:14px;font-weight:700;color:var(--coral);margin-bottom:.6rem">&#128176; Sent, awaiting payment ('+needsPayment.length+')</div>'
+      +'<table style="'+tableStyle+'">'
+      +'<thead><tr>'
+      +'<th style="'+thStyle+'">Student</th>'
+      +'<th style="'+thStyle+'">Period</th>'
+      +'<th style="'+thStyle+'">Lessons</th>'
+      +'<th style="'+thStyle+'">Amount</th>'
+      +'<th style="'+thStyle+'">Sent on</th>'
+      +'<th style="'+thStyle+'"></th>'
+      +'</tr></thead><tbody>'
+      +needsPayment.map(e=>
+        '<tr style="background:var(--coral-light)">'
+        +'<td style="'+tdStyle+'"><strong>'+e.name+'</strong><div style="font-size:11px;color:var(--text-muted)">'+e.recipient+'</div></td>'
+        +'<td style="'+tdStyle+'">'+e.period+'</td>'
+        +'<td style="'+tdStyle+'">'+e.lessons+'</td>'
+        +'<td style="'+tdStyle+';font-weight:700">$'+e.total+'</td>'
+        +'<td style="'+tdStyle+';font-size:12px;font-style:italic">'+e.sentDate+'</td>'
+        +'<td style="'+tdStyle+'"><button class="btn btn-sm" onclick="showView(\'invoices\');setTimeout(()=>{document.getElementById(\'inv-month\').value='+e.month+';document.getElementById(\'inv-year\').value='+e.year+';renderInvoices();showInvoice(\''+e.studentId+'\','+e.month+','+e.year+')},50)">View</button></td>'
+        +'</tr>'
+      ).join('')
+      +'</tbody></table>';
+  }
+
+  out.innerHTML=html;
+}
+
+// ── Offline detection ─────────────────────────────────────────
+window.addEventListener('online',()=>{if(gapi.client&&gapi.client.getToken())saveToDrive();});
+window.addEventListener('offline',()=>{setSyncStatus('offline','Offline \u2013 changes saved locally',false,true);});
+
+// ── Init ──────────────────────────────────────────────────────
+loadLocal();
+// Migrate old-format students (flat lessonDay/lessonTime) to scheduleRanges
+state.students.forEach(s=>{
+  if(!s.scheduleRanges&&s.lessonDay!==undefined){
+    s.scheduleRanges=[{
+      id:uid(), lessonDay:s.lessonDay, lessonTime:s.lessonTime,
+      lessonLength:s.lessonLength||60,
+      startDate:new Date().getFullYear()+'-01-01', endDate:null
+    }];
+  }
+});
+// Ensure invoiceStatus exists
+if(!state.invoiceStatus) state.invoiceStatus={};
+calYear=new Date().getFullYear();calMonth=new Date().getMonth();
+renderStudents();
+window.gisLoaded=gisLoaded;
+</script>
+<script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+</body>
+</html>
